@@ -1,59 +1,145 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	// @ts-nocheck
+
+	import stickers from '$lib/stickers';
+	import { onMount } from 'svelte';
+	import { flip } from 'svelte/animate';
+	import { blur } from 'svelte/transition';
+	import debounce from 'lodash/debounce';
+
+	onMount(() => {
+		import('@lottiefiles/lottie-player/dist/tgs-player.js');
+	});
+
+	let trigger;
+	let show = false;
+	let amount = 2;
+
+	const handleAmountInput = debounce((e) => {
+		const newAmount = e.target.value;
+		amount = Math.abs((newAmount - 1) % 9) + 1;
+	}, 50);
+
+	const initPlayer = (player) => {
+		const handleComplete = () => {
+			player.pause();
+		};
+
+		const handlePlayerReady = () => {
+			player.play();
+		};
+
+		const handleTrigger = () => {
+			player.load(stickers[Math.floor(Math.random() * 6)]);
+		};
+
+		trigger.addEventListener('click', handleTrigger);
+		player.addEventListener('ready', handlePlayerReady);
+		player.addEventListener('complete', handleComplete);
+
+		handleTrigger();
+
+		return {
+			destroy() {
+				player.removeEventListener('complete', handleComplete);
+				player.removeEventListener('ready', handlePlayerReady);
+				trigger.removeEventListener('click', handleTrigger);
+			}
+		};
+	};
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Кубики онлайн</title>
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
+<div class="container">
+	<div class="dices">
+		{#if show}
+			{#each Array(amount) as _, index (index)}
+				<tgs-player
+					transition:blur|global={{ duration: 250, amount: 12 }}
+					role="none"
+					use:initPlayer
+					animate:flip={{ duration: 250 }}
+				/>
+			{/each}
+		{/if}
+	</div>
 
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
+	<div class="controls">
+		<input
+			class="amount"
+			type="number"
+			max="9"
+			min="1"
+			on:input={handleAmountInput}
+			value={amount}
+		/>
+		<button
+			class="roll"
+			bind:this={trigger}
+			on:click={() => {
+				show = true;
+			}}>Бросить</button
+		>
+	</div>
+</div>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
+	tgs-player {
+		width: 150px;
+		height: 150px;
+		pointer-events: none;
 	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
+	.container {
 		width: 100%;
 		height: 100%;
-		top: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+	}
+
+	.dices {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 350px;
+	}
+
+	.controls {
+		display: flex;
+		gap: 1rem;
+	}
+	.roll {
 		display: block;
+		background: none;
+		border: none;
+		border: 2px skyblue solid;
+		border-radius: 2px;
+		padding: 0 2rem;
+		cursor: pointer;
+		font-size: 2rem;
+		line-height: 2.5rem;
+		color: skyblue;
+		transition: all 0.25s ease;
+	}
+
+	.amount {
+		font-size: 2rem;
+		line-height: 2.5rem;
+		outline: none;
+		border: 2px skyblue solid;
+		text-align: center;
+	}
+
+	.roll:active {
+		filter: blur(2px);
+	}
+
+	.roll:hover {
+		background-color: skyblue;
+		color: #fff;
 	}
 </style>
