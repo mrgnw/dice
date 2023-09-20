@@ -15,10 +15,15 @@
 	let show = false;
 	let amount = 2;
 
-	const handleAmountInput = debounce((e) => {
-		const newAmount = e.target.value;
-		amount = Math.abs((newAmount - 1) % 9) + 1;
-	}, 50);
+	const min = 1;
+	const max = 5;
+
+	const changeAmount = debounce((value) => {
+		amount = ((Math.abs(value + amount) - 1) % max) + 1;
+	});
+
+	const increment = changeAmount.bind(null, 1);
+	const decrement = changeAmount.bind(null, -1);
 
 	const initPlayer = (player) => {
 		const handleComplete = () => {
@@ -68,21 +73,16 @@
 	</div>
 
 	<div class="controls">
-		<input
-			class="amount"
-			type="number"
-			max="9"
-			min="1"
-			on:input={handleAmountInput}
-			value={amount}
-		/>
+		<button class="button decrement" on:click={decrement} disabled={amount === min}>-</button>
 		<button
-			class="roll"
+			class="button roll"
 			bind:this={trigger}
 			on:click={() => {
 				show = true;
 			}}>Бросить</button
 		>
+
+		<button class="button increment" on:click={increment} disabled={amount === max}>+</button>
 	</div>
 </div>
 
@@ -105,14 +105,24 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		min-height: 350px;
+		min-height: 400px;
+		padding: 2rem 0;
+		flex-wrap: wrap;
 	}
 
 	.controls {
 		display: flex;
 		gap: 1rem;
 	}
-	.roll {
+
+	@media (hover: none) {
+		.button:hover {
+			background-color: none;
+			color: skyblue;
+		}
+	}
+
+	.button {
 		display: block;
 		background: none;
 		border: none;
@@ -124,21 +134,19 @@
 		line-height: 2.5rem;
 		color: skyblue;
 		transition: all 0.25s ease;
+		user-select: none;
 	}
 
-	.amount {
-		font-size: 2rem;
-		line-height: 2.5rem;
-		outline: none;
-		border: 2px skyblue solid;
-		text-align: center;
+	.button:disabled {
+		pointer-events: none;
+		filter: grayscale(1);
 	}
 
-	.roll:active {
+	.button:active {
 		filter: blur(2px);
 	}
 
-	.roll:hover {
+	.button:hover {
 		background-color: skyblue;
 		color: #fff;
 	}
