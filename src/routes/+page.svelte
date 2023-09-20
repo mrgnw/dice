@@ -4,7 +4,7 @@
 	import stickers from '$lib/stickers';
 	import { onMount } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import { blur } from 'svelte/transition';
+	import { blur, scale } from 'svelte/transition';
 	import debounce from 'lodash/debounce';
 
 	onMount(() => {
@@ -20,7 +20,7 @@
 
 	const changeAmount = debounce((value) => {
 		amount = ((Math.abs(value + amount) - 1) % max) + 1;
-	});
+	}, 50);
 
 	const increment = changeAmount.bind(null, 1);
 	const decrement = changeAmount.bind(null, -1);
@@ -73,7 +73,14 @@
 	</div>
 
 	<div class="controls">
-		<button class="button decrement" on:click={decrement} disabled={amount === min}>-</button>
+		{#if show}
+			<button
+				class="button decrement"
+				on:click={decrement}
+				disabled={amount === min}
+				transition:scale>-</button
+			>
+		{/if}
 		<button
 			class="button roll"
 			bind:this={trigger}
@@ -82,11 +89,26 @@
 			}}>Бросить</button
 		>
 
-		<button class="button increment" on:click={increment} disabled={amount === max}>+</button>
+		{#if show}
+			<button
+				class="button increment"
+				on:click={increment}
+				disabled={amount === max}
+				transition:scale>+</button
+			>
+		{/if}
 	</div>
 </div>
 
 <style>
+	:global(body) {
+		--color: skyblue;
+		--accent: white;
+		min-height: 100dvh;
+		margin: 0;
+		background-image: linear-gradient(10deg, #09203f 0%, #537895 100%);
+	}
+
 	tgs-player {
 		width: 150px;
 		height: 150px;
@@ -113,12 +135,12 @@
 	.controls {
 		display: flex;
 		gap: 1rem;
+		padding-bottom: 1rem;
 	}
 
-	@media (hover: none) {
-		.button:hover {
-			background-color: none;
-			color: skyblue;
+	@media (max-width: 400px) {
+		.controls {
+			flex-direction: column;
 		}
 	}
 
@@ -126,20 +148,20 @@
 		display: block;
 		background: none;
 		border: none;
-		border: 2px skyblue solid;
+		border: 2px var(--color) solid;
 		border-radius: 2px;
 		padding: 0 2rem;
 		cursor: pointer;
 		font-size: 2rem;
 		line-height: 2.5rem;
-		color: skyblue;
+		color: var(--color);
 		transition: all 0.25s ease;
 		user-select: none;
 	}
 
 	.button:disabled {
 		pointer-events: none;
-		filter: grayscale(1);
+		opacity: 0.2;
 	}
 
 	.button:active {
@@ -147,7 +169,7 @@
 	}
 
 	.button:hover {
-		background-color: skyblue;
-		color: #fff;
+		background-color: var(--color);
+		color: var(--accent);
 	}
 </style>
