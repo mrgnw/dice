@@ -16,7 +16,7 @@
 	let amount = 2;
 
 	const min = 1;
-	const max = 5;
+	const max = 6;
 
 	const changeAmount = debounce((value) => {
 		amount = ((Math.abs(value + amount) - 1) % max) + 1;
