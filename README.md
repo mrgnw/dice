@@ -1,4 +1,4 @@
-## [ONLINE PREVIEW](https://raamar.github.io/svelte/)
+## [ONLINE PREVIEW](https://dice.coderomil.ru/)
 
 # create-svelte
 
