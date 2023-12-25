@@ -55,7 +55,7 @@
 </script>
 
 <svelte:head>
-	<title>Кубики онлайн</title>
+	<title>🎲 Dice</title>
 </svelte:head>
 
 <div class="container">
